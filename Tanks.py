@@ -35,7 +35,12 @@ clock = pygame.time.Clock()
 FPS = 15
 
 mainTankX = display_width * 0.9
-mainTankY = display_height * 0.7
+mainTankY = display_height * 0.9
+#Tank size
+tank_width = 40
+tank_height = 20
+turret_width = 5
+wheel_width = 5
 
 #Rounding function to the next 10s so stuff will be perfectly alligned
 def roundToNextTen(n):
@@ -156,8 +161,20 @@ def message_to_screen(msg,color, y_displace=0, size = "small"):
     gameDisplay.blit(textSurf, textRect)
 
 def tank(x,y):
-    pygame.draw.circle(gameDisplay, black, (int(x),int(y)),20)
-
+    x = int(x)
+    y = int(y)
+    pygame.draw.circle(gameDisplay, black, (x,y), int(tank_height/2))
+    pygame.draw.rect(gameDisplay, black, (x-tank_height, y, tank_width, tank_height))
+    pygame.draw.line(gameDisplay, black, (x,y), (x-10, y-20), turret_width)
+    pygame.draw.circle(gameDisplay, black, (x-15, y+20), wheel_width)
+    pygame.draw.circle(gameDisplay, black, (x-10, y+20), wheel_width)
+    pygame.draw.circle(gameDisplay, black, (x-5, y+20), wheel_width)
+    pygame.draw.circle(gameDisplay, black, (x, y+20), wheel_width)
+    pygame.draw.circle(gameDisplay, black, (x+5, y+20), wheel_width)
+    pygame.draw.circle(gameDisplay, black, (x+10, y+20), wheel_width)
+    pygame.draw.circle(gameDisplay, black, (x+15, y+20), wheel_width)
+    
+    
 def game_controls():
     intro = True
     while intro:
