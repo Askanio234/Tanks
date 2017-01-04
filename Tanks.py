@@ -6,7 +6,7 @@ Created on Sun Nov 27 20:34:28 2016
 """
 
 import pygame
-
+import random
 
 pygame.init()
 #Defining colors
@@ -34,8 +34,7 @@ pygame.display.set_caption('Tanks!')
 clock = pygame.time.Clock()
 FPS = 15
 
-mainTankX = display_width * 0.9
-mainTankY = display_height * 0.9
+
 #Tank size
 tank_width = 40
 tank_height = 20
@@ -115,6 +114,15 @@ def score(score):
     text = smallfont.render("Score: " + str(score), True, black)
     gameDisplay.blit(text, [0,0])
 
+def barrier(x_location, random_height):
+   
+    
+    pygame.draw.rect(gameDisplay, green, 
+                     [
+                     x_location,display_height-random_height, 50, 
+                     random_height
+                        ])
+
 def game_intro():
     intro = True
     while intro:
@@ -160,12 +168,25 @@ def message_to_screen(msg,color, y_displace=0, size = "small"):
     textRect.center = (display_width/2), (display_height/2) + y_displace
     gameDisplay.blit(textSurf, textRect)
 
-def tank(x,y):
+def tank(x,y, turret_position):
     x = int(x)
     y = int(y)
+        
+    possible_turrets = [
+                        (x-27, y-2),
+                        (x-26, y-5),
+                        (x-25, y-8),
+                        (x-23, y-12),
+                        (x-20, y-14),
+                        (x-18, y-15),
+                        (x-15, y-17),
+                        (x-13, y-19),
+                        (x-11, y-21)
+                        ]
+    
     pygame.draw.circle(gameDisplay, black, (x,y), int(tank_height/2))
     pygame.draw.rect(gameDisplay, black, (x-tank_height, y, tank_width, tank_height))
-    pygame.draw.line(gameDisplay, black, (x,y), (x-10, y-20), turret_width)
+    pygame.draw.line(gameDisplay, black, (x,y), possible_turrets[turret_position], turret_width)
     pygame.draw.circle(gameDisplay, black, (x-15, y+20), wheel_width)
     pygame.draw.circle(gameDisplay, black, (x-10, y+20), wheel_width)
     pygame.draw.circle(gameDisplay, black, (x-5, y+20), wheel_width)
@@ -215,6 +236,18 @@ def gameLoop():
     running = True
     gameOver = False
     FPS = 15
+    
+    mainTankX = display_width * 0.9
+    mainTankY = display_height * 0.9
+    tank_move = 0
+
+    current_turret_position = 0
+    change_turret = 0
+     
+    x_location = (display_width/2) 
+    + random.randint(-0.2*display_width, 0.2*display_width)
+    random_height = random.randrange(display_height*0.1,display_height*0.6)
+    
     while running:
         while gameOver:
             gameDisplay.fill(white)
@@ -245,16 +278,20 @@ def gameLoop():
             #Moving the Tank
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    pass
+                    tank_move = -5
                 elif event.key == pygame.K_RIGHT:
-                    pass
+                    tank_move = 5
                 elif event.key == pygame.K_UP:
-                    pass
+                    change_turret = 1
                 elif event.key == pygame.K_DOWN:
-                    pass
+                    change_turret = -1
                 elif event.key == pygame.K_p:
                     pause()
-           
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+                    tank_move = 0
+                if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                    change_turret = 0
             #Quiting the game
             if event.type == pygame.QUIT:
                 running = False
@@ -264,8 +301,14 @@ def gameLoop():
         gameDisplay.fill(white)
         
         #Rendering graphics
-        tank(mainTankX,mainTankY)
-       
+        mainTankX += tank_move
+        current_turret_position += change_turret
+        if current_turret_position > 8:
+            current_turret_position = 8
+        elif current_turret_position < 0:
+            current_turret_position = 0
+        tank(mainTankX,mainTankY, current_turret_position)
+        barrier(x_location, random_height)
         
         
                 
