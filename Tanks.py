@@ -114,14 +114,43 @@ def score(score):
     text = smallfont.render("Score: " + str(score), True, black)
     gameDisplay.blit(text, [0,0])
 
-def barrier(x_location, random_height):
+def barrier(x_location, random_height, barrier_width):
    
     
     pygame.draw.rect(gameDisplay, green, 
                      [
-                     x_location,display_height-random_height, 50, 
+                     x_location,display_height-random_height, barrier_width, 
                      random_height
                         ])
+                        
+
+def fire_shell(xy, tank_x, tank_y, turret_position, gun_power):
+    fire = True
+    
+    starting_shell = list(xy)
+    print("Fire", xy)
+    
+    while fire:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+        print(starting_shell[0],starting_shell[1])
+        pygame.draw.circle(gameDisplay, red, (starting_shell[0],starting_shell[1]), 5)
+        starting_shell[0] -= (10 - turret_position)*2
+        starting_shell[1] += int((((starting_shell[0]-xy[0])*0.015/(gun_power/50))**2) 
+        - (turret_position+turret_position/(12-turret_position)))
+        
+        if starting_shell[1] > display_height:
+            fire = False
+        
+        pygame.display.update()
+        clock.tick(60)
+        
+def power(level):
+    text = smallfont.render("Power: " + str(level)+"%", True, black)
+    gameDisplay.blit(text, [display_width/2, 0])
+
 
 def game_intro():
     intro = True
@@ -195,6 +224,7 @@ def tank(x,y, turret_position):
     pygame.draw.circle(gameDisplay, black, (x+10, y+20), wheel_width)
     pygame.draw.circle(gameDisplay, black, (x+15, y+20), wheel_width)
     
+    return possible_turrets[turret_position]
     
 def game_controls():
     intro = True
@@ -243,12 +273,19 @@ def gameLoop():
 
     current_turret_position = 0
     change_turret = 0
-     
+    
+    fire_power = 50
+    power_change = 0
+    
     x_location = (display_width/2) 
     + random.randint(-0.2*display_width, 0.2*display_width)
     random_height = random.randrange(display_height*0.1,display_height*0.6)
+    barrier_width = 50
     
     while running:
+        gameDisplay.fill(white)
+        gun = tank(mainTankX,mainTankY, current_turret_position)
+        
         while gameOver:
             gameDisplay.fill(white)
             message_to_screen("Game over", 
@@ -287,18 +324,27 @@ def gameLoop():
                     change_turret = -1
                 elif event.key == pygame.K_p:
                     pause()
+                elif event.key == pygame.K_SPACE:
+                    fire_shell(gun, mainTankX,mainTankY,
+                               current_turret_position, fire_power)
+                elif event.key == pygame.K_a:
+                    power_change = -1
+                elif event.key == pygame.K_d:
+                    power_change = 1
+                    
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                     tank_move = 0
                 if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
                     change_turret = 0
+                if event.key == pygame.K_a or event.key == pygame.K_d:
+                    power_change = 0
             #Quiting the game
             if event.type == pygame.QUIT:
                 running = False
                 
         
-        #Changing color of display
-        gameDisplay.fill(white)
+      
         
         #Rendering graphics
         mainTankX += tank_move
@@ -307,8 +353,15 @@ def gameLoop():
             current_turret_position = 8
         elif current_turret_position < 0:
             current_turret_position = 0
-        tank(mainTankX,mainTankY, current_turret_position)
-        barrier(x_location, random_height)
+        
+        if mainTankX - (tank_width/2) < x_location + barrier_width:
+            mainTankX += 5
+            
+        fire_power += power_change
+        
+        power(fire_power)
+        
+        barrier(x_location, random_height, barrier_width)
         
         
                 
