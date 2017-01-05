@@ -123,8 +123,35 @@ def barrier(x_location, random_height, barrier_width):
                      random_height
                         ])
                         
-
-def fire_shell(xy, tank_x, tank_y, turret_position, gun_power):
+def explosion(x, y, size=50):
+    explode = True
+    
+    while explode:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+                
+        start_point = x,y
+        
+        color_choices = [red, light_red, light_yellow, light_green]
+        
+        magnitude = 1
+        
+        while magnitude < size:
+            exploding_bit_x = x+random.randrange(-1*magnitude, magnitude)
+            exploding_bit_y = y+random.randrange(-1*magnitude, magnitude)
+            
+            pygame.draw.circle(gameDisplay, color_choices[random.randrange(0,4)],
+            (exploding_bit_x,exploding_bit_y),random.randrange(1,5))
+            magnitude += 1
+            
+            pygame.display.update()
+            clock.tick(100)
+        explode = False
+                        
+def fire_shell(xy, tank_x, tank_y, turret_position, 
+               gun_power, x_location, barrier_width, random_height):
     fire = True
     
     starting_shell = list(xy)
@@ -143,6 +170,29 @@ def fire_shell(xy, tank_x, tank_y, turret_position, gun_power):
         
         if starting_shell[1] > display_height:
             fire = False
+            
+            hit_x = int((starting_shell[0]*display_height)/starting_shell[1])
+            hit_y = int(display_height)            
+            
+            print("Impact:", hit_x, hit_y)
+            
+            explosion(hit_x, hit_y)            
+        
+        check_x_1 = starting_shell[0] <= x_location + barrier_width
+        check_x_2 = starting_shell[0] >= x_location
+        
+        check_y_1 = starting_shell[1] <= display_height
+        check_y_2 = starting_shell[1] >= display_height - random_height
+
+        if check_x_1 and check_x_2 and check_y_1 and check_y_2:
+            fire = False
+            
+            hit_x = int((starting_shell[0]))
+            hit_y = int(starting_shell[1])            
+            
+            print("Impact:", hit_x, hit_y)
+            
+            explosion(hit_x, hit_y)
         
         pygame.display.update()
         clock.tick(60)
@@ -283,9 +333,7 @@ def gameLoop():
     barrier_width = 50
     
     while running:
-        gameDisplay.fill(white)
-        gun = tank(mainTankX,mainTankY, current_turret_position)
-        
+       
         while gameOver:
             gameDisplay.fill(white)
             message_to_screen("Game over", 
@@ -326,7 +374,8 @@ def gameLoop():
                     pause()
                 elif event.key == pygame.K_SPACE:
                     fire_shell(gun, mainTankX,mainTankY,
-                               current_turret_position, fire_power)
+                               current_turret_position, fire_power,
+                               x_location, barrier_width, random_height)
                 elif event.key == pygame.K_a:
                     power_change = -1
                 elif event.key == pygame.K_d:
@@ -357,6 +406,9 @@ def gameLoop():
         if mainTankX - (tank_width/2) < x_location + barrier_width:
             mainTankX += 5
             
+        gameDisplay.fill(white)
+        gun = tank(mainTankX,mainTankY, current_turret_position)
+        
         fire_power += power_change
         
         power(fire_power)
