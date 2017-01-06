@@ -282,8 +282,9 @@ def enemy_fire_shell(xy, tank_x, tank_y, turret_position,
         
         starting_shell[0] += (10 - turret_position)*2
         
-            
-        starting_shell[1] += int((((starting_shell[0]-xy[0])*0.015/(current_power/50))**2) 
+        gun_power = random.randrange(int(current_power*0.90), int(current_power*1.10))        
+        
+        starting_shell[1] += int((((starting_shell[0]-xy[0])*0.015/(gun_power/50))**2) 
         - (turret_position+turret_position/(12-turret_position)))
         
         if starting_shell[1] > display_height - ground_height:
@@ -322,6 +323,10 @@ def power(level):
     text = smallfont.render("Power: " + str(level)+"%", True, black)
     gameDisplay.blit(text, [display_width/2, 0])
 
+def message_to_screen(msg,color, y_displace=0, size = "small"):
+    textSurf, textRect = text_objects(msg ,color, size)
+    textRect.center = (display_width/2), (display_height/2) + y_displace
+    gameDisplay.blit(textSurf, textRect)
 
 def game_intro():
     intro = True
@@ -363,10 +368,58 @@ def game_intro():
         pygame.display.update()
         clock.tick(30)
 
-def message_to_screen(msg,color, y_displace=0, size = "small"):
-    textSurf, textRect = text_objects(msg ,color, size)
-    textRect.center = (display_width/2), (display_height/2) + y_displace
-    gameDisplay.blit(textSurf, textRect)
+def game_over():
+    game_over = True
+    while game_over:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            
+                    
+        gameDisplay.fill(white)
+        message_to_screen("GAME OVER!",
+                          red,
+                          -100,
+                          "large")
+        message_to_screen("You Died.", 
+                          black,
+                          -30)
+        
+        
+        button("Play Again", 150, 500, 150, 50,green,light_green, action = "play")
+        button("Controls", 350,500,100,50,yellow,light_yellow, action = "controls")
+        button("Quit", 550,500,100,50,red,light_red, action = "quit")
+        
+        pygame.display.update()
+        clock.tick(15)
+
+def you_win():
+    win = True
+    while win:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            
+                    
+        gameDisplay.fill(white)
+        message_to_screen("You WON",
+                          red,
+                          -100,
+                          "large")
+        message_to_screen("GZ GJ GL HF", 
+                          black,
+                          -30)
+        
+        
+        button("Play Again", 150, 500, 150, 50,green,light_green, action = "play")
+        button("Controls", 350,500,100,50,yellow,light_yellow, action = "controls")
+        button("Quit", 550,500,100,50,red,light_red, action = "quit")
+        
+        pygame.display.update()
+        clock.tick(15)
+
 
 def tank(x,y, turret_position):
     x = int(x)
@@ -602,6 +655,10 @@ def gameLoop():
     
        
         pygame.display.update()
+        if player_health < 1:
+            game_over()
+        elif enemy_health < 1:
+            you_win()
         #Updating clock No. of ticks = FPS
         clock.tick(FPS)
     pygame.quit()
