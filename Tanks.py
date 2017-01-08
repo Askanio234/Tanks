@@ -180,9 +180,18 @@ def fire_shell(xy, tank_x, tank_y, turret_position,
             hit_y = int(display_height - ground_height)            
             
             print("Impact:", hit_x, hit_y)
-            if enemy_tank_x + 15 > hit_x > enemy_tank_x -15:
-                print("Player Hit Target")
+            if enemy_tank_x + 10 > hit_x > enemy_tank_x - 10:
+                print("Player Critical Hit")
                 damage = 25
+            elif enemy_tank_x + 15 > hit_x > enemy_tank_x - 15:
+                print("Player Hard Hit")
+                damage = 18
+            elif enemy_tank_x + 20 > hit_x > enemy_tank_x - 20:
+                print("Player Medium Hit")
+                damage = 10
+            elif enemy_tank_x + 35 > hit_x > enemy_tank_x - 35:
+                print("Player Light Hit")
+                damage = 5
             explosion(hit_x, hit_y)
             fire = False            
         
@@ -293,9 +302,18 @@ def enemy_fire_shell(xy, tank_x, tank_y, turret_position,
             hit_y = int(display_height - ground_height)            
             
             print("Impact:", hit_x, hit_y)
-            if player_x +15 > hit_x > player_x - 15:
-                print("Target Hit")
+            if player_x + 10 > hit_x > player_x - 10:
+                print("Enemy Critical Hit")
                 damage = 25
+            elif player_x + 15 > hit_x > player_x - 15:
+                print("Enemy Hard Hit")
+                damage = 18
+            elif player_x + 20 > hit_x > player_x - 20:
+                print("Enemy Medium Hit")
+                damage = 10
+            elif player_x + 35 > hit_x > player_x - 35:
+                print("Enemy Light Hit")
+                damage = 5
             explosion(hit_x, hit_y)
             fire = False            
         
